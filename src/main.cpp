@@ -46,7 +46,7 @@ void connectToWifi(const char *ssid, const char *password) {
 bool doorBellTriggered() {
   unsigned long currentTime = millis();
 
-  if (currentTime - lastDoorBellRing > 15000 && digitalRead(DOORBELL_PIN) != 1) {
+  if (currentTime - lastDoorBellRing > 25000 && digitalRead(DOORBELL_PIN) != 1) {
     lastDoorBellRing = currentTime;
     return true;
   }
