@@ -1,13 +1,11 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
-#include <PubSubClient.h> 
+#include <PubSubClient.h>
 #include "secrets.h"
 
 #define FW_VERSION "1.0.0"
 #define MQTT_SERVER "192.168.150.99"
 
-const char *ssid = SSID;
-const char *password = WIFI_PW;
 const int DOORBELL_PIN = D3;
 int lastDoorbellClickState = 0;
 
@@ -30,36 +28,37 @@ void publishMqtt(const char *topic, const char *value, bool retain) {
   client->publish(finalTopic.c_str(), value, retain);
 }
 
-void setup()
-{
-  Serial.begin(9600);
+void connectToWifi(const char *ssid, const char *password) {
+  Serial.printf("Connecting to %s\n", ssid);
   WiFi.begin(ssid, password);
 
-  pinMode(DOORBELL_PIN, INPUT_PULLUP);
-
   // Wait for connection
-  while (WiFi.status() != WL_CONNECTED)
-  {
+  while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
   }
-  Serial.println("");
-  Serial.print("Connected to ");
-  Serial.println(ssid);
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
-
-  client = new PubSubClient(espClient);
-  client->setServer(MQTT_SERVER, 1883);
 
   connectMqtt();
-  publishMqtt("firmware", FW_VERSION, true);
+  Serial.printf("\nConnected. Got IP: %s\n", WiFi.localIP().toString().c_str());
   publishMqtt("ip", WiFi.localIP().toString().c_str(), true);
 }
 
-void loop()
-{
+void setup() {
+  Serial.begin(9600);
+  pinMode(DOORBELL_PIN, INPUT_PULLUP);
+  client = new PubSubClient(espClient);
+  client->setServer(MQTT_SERVER, 1883);
+  connectToWifi(SSID, WIFI_PW);
+  publishMqtt("firmware", FW_VERSION, true);
+}
+
+void loop() {
   delay(1000);
+
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("Disconnected from WiFi");
+    connectToWifi(SSID, WIFI_PW);
+  }
 
   int doorbellState = digitalRead(DOORBELL_PIN);
 
@@ -67,7 +66,6 @@ void loop()
   Serial.println(doorbellState);
 
   if (doorbellState != lastDoorbellClickState) {
-
     connectMqtt();
     Serial.println("Doorbell ring ring!");
     publishMqtt("ring", "ding", false);
