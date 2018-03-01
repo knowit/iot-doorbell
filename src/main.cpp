@@ -2,35 +2,37 @@
 #include <ESP8266WiFi.h>
 #include "secrets.h"
 
-const char *ssid = SSID;
-const char *password = WIFI_PW;
 const int DOORBELL_PIN = D3;
 
 int lastDoorbellClickState = 0;
 
-void setup()
-{
-  Serial.begin(9600);
+void connectToWifi(const char *ssid, const char *password) {
+  Serial.printf("Connecting to %s\n", ssid);
   WiFi.begin(ssid, password);
 
-  pinMode(DOORBELL_PIN, INPUT_PULLUP);
-
   // Wait for connection
-  while (WiFi.status() != WL_CONNECTED)
-  {
+  while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
   }
-  Serial.println("");
-  Serial.print("Connected to ");
-  Serial.println(ssid);
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
+
+  Serial.printf("\nConnected. Got IP: %s\n", WiFi.localIP().toString());
 }
 
-void loop()
-{
+void setup() {
+  Serial.begin(9600);
+  connectToWifi(SSID, WIFI_PW);
+
+  pinMode(DOORBELL_PIN, INPUT_PULLUP);
+}
+
+void loop() {
   delay(1000);
+
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("Disconnected from WiFi");
+    connectToWifi(SSID, WIFI_PW);
+  }
 
   int doorbellState = digitalRead(DOORBELL_PIN);
 
