@@ -7,7 +7,7 @@
 #define MQTT_SERVER "192.168.150.99"
 
 const int DOORBELL_PIN = D3;
-int lastDoorbellClickState = 0;
+unsigned long lastDoorBellRing = 0;
 
 const char* baseTopic = "sensor/stavanger/door/bell/";
 
@@ -43,6 +43,16 @@ void connectToWifi(const char *ssid, const char *password) {
   publishMqtt("ip", WiFi.localIP().toString().c_str(), true);
 }
 
+bool doorBellTriggered() {
+  unsigned long currentTime = millis();
+
+  if (currentTime - lastDoorBellRing > 15000 && digitalRead(DOORBELL_PIN) != 1) {
+    lastDoorBellRing = currentTime;
+    return true;
+  }
+  return false;
+}
+
 void setup() {
   Serial.begin(9600);
   pinMode(DOORBELL_PIN, INPUT_PULLUP);
@@ -60,16 +70,8 @@ void loop() {
     connectToWifi(SSID, WIFI_PW);
   }
 
-  int doorbellState = digitalRead(DOORBELL_PIN);
-
-  Serial.print("Current state: ");
-  Serial.println(doorbellState);
-
-  if (doorbellState != lastDoorbellClickState) {
-    connectMqtt();
+  if (doorBellTriggered()) {
     Serial.println("Doorbell ring ring!");
     publishMqtt("ring", "ding", false);
   }
-
-  lastDoorbellClickState = doorbellState;
 }
