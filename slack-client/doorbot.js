@@ -12,7 +12,7 @@ client.on('message', (topic, message) => {
   if(topic === settings.mqttTopic) {
     console.log('on topic ' + settings.mqttTopic)
     console.log('Message: ' + message.toString())
-    webhook.send('TEST: Det ringer på! :door:', function(err, res) {
+    webhook.send('Det ringer på! :door:', function(err, res) {
       if (err) {
           console.log('Error:', err)
       } else {
