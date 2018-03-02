@@ -1,0 +1,30 @@
+{
+  "name": "stavanger-iot-slack-bot",
+  "version": "1.0.0",
+  "description": "Forwards interesting stuff from IoT devices to Slack",
+  "main": "doorbot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/knowit/iot-doorbell.git"
+  },
+  "keywords": [
+    "iot",
+    "esp8266",
+    "nodemcu",
+    "slack",
+    "mqtt"
+  ],
+  "author": "Frode Anonsen <froano@knowit.no>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/knowit/iot-doorbell/issues"
+  },
+  "homepage": "https://github.com/knowit/iot-doorbell#readme",
+  "dependencies": {
+    "@slack/client": "^3.16.0",
+    "mqtt": "^2.16.0"
+  }
+}
